@@ -178,7 +178,42 @@
       white-space: pre-wrap;
     }
 
-    .list-empty { padding: 16px; color: var(--muted); font-size: 15px; }
+    .list-empty {
+      padding: 34px 20px;
+      color: var(--muted);
+      font-size: 15px;
+      text-align: center;
+    }
+    .empty-icon {
+      width: 52px;
+      height: 52px;
+      margin: 0 auto 12px;
+      border-radius: 16px;
+      background: var(--input);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+    }
+    .empty-title { color: var(--text); font-size: 17px; font-weight: 650; margin-bottom: 4px; }
+    .empty-desc { color: var(--muted); font-size: 14px; }
+    .count-badge {
+      color: var(--muted);
+      font-size: 13px;
+      background: var(--input);
+      border-radius: 999px;
+      padding: 4px 10px;
+      white-space: nowrap;
+    }
+    .answer-card {
+      margin-top: 14px;
+      padding: 14px;
+      border-radius: 12px;
+      background: var(--input);
+      color: var(--text);
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
 
     .memory {
       padding: 16px;
@@ -311,7 +346,10 @@
 
         <div class="span">
           <div class="between">
-            <h2 style="margin-bottom:8px">全部记忆</h2>
+            <div class="row" style="gap:8px;align-items:baseline">
+              <h2 style="margin-bottom:8px">全部记忆</h2>
+              <span id="memoryCount" class="count-badge hide">0</span>
+            </div>
             <button id="refreshBtn" class="plain" style="font-size:15px;margin-right:16px">刷新</button>
           </div>
           <div id="memoryList" class="card">
@@ -384,6 +422,12 @@
       el.innerHTML = html;
     }
 
+    function showAnswer(text) {
+      const el = $('searchMsg');
+      el.className = 'msg';
+      el.innerHTML = `<div class="answer-card">${esc(text || '没有找到相关记忆')}</div>`;
+    }
+
     function hide(id) { $(id).classList.add('hide'); }
 
     function normalizeApiBase(value) {
@@ -424,6 +468,21 @@
         button.textContent = button.dataset.oldText || button.textContent;
         button.disabled = false;
       }
+    }
+
+    function setMemoryCount(count) {
+      const badge = $('memoryCount');
+      if (!badge) return;
+      if (typeof count !== 'number') {
+        badge.classList.add('hide');
+        return;
+      }
+      badge.textContent = String(count);
+      badge.classList.remove('hide');
+    }
+
+    function emptyState(icon, title, desc) {
+      return `<div class="list-empty"><div class="empty-icon">${icon}</div><div class="empty-title">${esc(title)}</div><div class="empty-desc">${esc(desc)}</div></div>`;
     }
 
     function enterApp(username) {
@@ -506,7 +565,7 @@
         const res = await fetch(API + '/memory/search?q=' + encodeURIComponent(query), { headers: headers() });
         const data = await res.json();
         if (!data.success) throw new Error(data.error || data.message || '搜索失败');
-        show('searchMsg', esc(data.answer || '没有找到相关记忆'), 'answer');
+        showAnswer(data.answer);
       } catch (err) {
         show('searchMsg', esc(err.message || '搜索失败'), 'error');
       } finally {
@@ -515,20 +574,22 @@
     }
 
     async function listMemories() {
-      $('memoryList').innerHTML = '<div class="list-empty">正在加载…</div>';
+      setMemoryCount(null);
+      $('memoryList').innerHTML = emptyState('⏳', '正在加载', '正在同步你的记忆列表…');
       try {
         const res = await fetch(API + '/memories?limit=50', { headers: headers() });
         const data = await res.json();
         if (!data.success) throw new Error(data.error || data.message || '获取失败');
 
         const memories = data.data?.memories || [];
+        setMemoryCount(memories.length);
         if (!memories.length) {
-          $('memoryList').innerHTML = '<div class="list-empty">暂无记忆</div>';
+          $('memoryList').innerHTML = emptyState('📝', '暂无记忆', '保存第一条记忆后，它会出现在这里。');
           return;
         }
 
         $('memoryList').innerHTML = memories.map(item => `
-          <article class="memory">
+          <article class="memory" data-memory-id="${esc(item.id)}">
             <div class="memory-head">
               <div class="meta">${esc(item.platform || '未分类')} · ${esc((item.created_at || '').slice(0, 10))}</div>
               <button class="danger" type="button" data-delete-id="${esc(item.id)}">删除</button>
@@ -538,7 +599,8 @@
           </article>
         `).join('');
       } catch (err) {
-        $('memoryList').innerHTML = `<div class="list-empty" style="color:var(--red)">${esc(err.message || '获取失败')}</div>`;
+        setMemoryCount(null);
+        $('memoryList').innerHTML = emptyState('⚠️', '加载失败', err.message || '请稍后重试');
       }
     }
 
@@ -578,8 +640,16 @@
         });
         const data = await res.json();
         if (!data.success) throw new Error(data.error || data.message || '删除失败');
+        const item = typeof CSS !== 'undefined' && CSS.escape ? document.querySelector(`[data-memory-id="${CSS.escape(id)}"]`) : null;
+        if (item) {
+          item.remove();
+          const remaining = document.querySelectorAll('[data-memory-id]').length;
+          setMemoryCount(remaining);
+          if (!remaining) $('memoryList').innerHTML = emptyState('📝', '暂无记忆', '保存第一条记忆后，它会出现在这里。');
+        } else {
+          listMemories();
+        }
         closeDeleteSheet();
-        listMemories();
       } catch (err) {
         alert(err.message || '删除失败');
       } finally {
