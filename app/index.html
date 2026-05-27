@@ -148,6 +148,20 @@
     .plain { background: transparent; color: var(--blue); padding: 4px 0; font-weight: 400; border-radius: 8px; }
     .danger { background: transparent; color: var(--red); padding: 4px 0; font-size: 15px; font-weight: 400; border-radius: 8px; }
     .small { padding: 9px 16px; font-size: 16px; }
+    .icon-btn {
+      width: 34px;
+      height: 34px;
+      padding: 0;
+      border-radius: 50%;
+      background: var(--input);
+      color: var(--blue);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      line-height: 1;
+      font-weight: 500;
+    }
 
     .msg {
       margin-top: 12px;
@@ -210,8 +224,16 @@
       transform: translateY(8px);
       animation: rise .18s ease forwards;
     }
+    .settings-sheet { max-width: 640px; }
     @keyframes rise { to { transform: translateY(0); } }
     .sheet-body { padding: 18px 16px 12px; text-align: center; }
+    .settings-sheet .sheet-body { text-align: left; padding: 18px 16px 16px; }
+    .settings-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+    .settings-title { font-size: 22px; font-weight: 720; letter-spacing: .2px; }
+    .settings-subtitle { color: var(--muted); font-size: 14px; margin: -6px 0 14px; }
+    .setting-group { margin-top: 16px; }
+    .setting-group:first-child { margin-top: 0; }
+    .setting-label { color: var(--muted); font-size: 13px; margin: 0 0 8px; padding-left: 2px; text-transform: uppercase; letter-spacing: .02em; }
     .sheet-title { font-weight: 700; margin-bottom: 6px; }
     .sheet-text { color: var(--muted); font-size: 14px; }
     .sheet-actions { border-top: .5px solid var(--line); }
@@ -257,7 +279,10 @@
     <section id="appView" class="hide">
       <div class="topbar">
         <div id="who" class="user"></div>
-        <button id="logoutBtn" class="plain">退出</button>
+        <div class="row" style="gap:14px">
+          <button id="settingsBtn" class="plain">设置</button>
+          <button id="logoutBtn" class="plain">退出</button>
+        </div>
       </div>
       <h1>我的记忆</h1>
 
@@ -294,19 +319,7 @@
           </div>
         </div>
 
-        <div class="span">
-          <h2>LLM 配置</h2>
-          <div class="card pad">
-            <input id="llmEndpoint" class="field" placeholder="接口地址，例如 https://api.deepseek.com/v1/chat/completions">
-            <input id="llmModel" class="field" placeholder="模型名称，例如 deepseek-chat">
-            <input id="llmKey" class="field" type="password" placeholder="API Key">
-            <div class="row">
-              <button id="configStatusBtn" class="secondary grow">查看状态</button>
-              <button id="configSaveBtn" class="grow">更新配置</button>
-            </div>
-            <div id="configMsg" class="msg hide"></div>
-          </div>
-        </div>
+        <!-- LLM 配置已移到右上角“设置”中 -->
       </div>
     </section>
   </main>
@@ -320,6 +333,30 @@
       <div class="sheet-actions">
         <button id="confirmDeleteBtn" class="confirm-delete">删除</button>
         <button id="cancelDeleteBtn">取消</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="settingsSheet" class="sheet-mask" aria-hidden="true">
+    <div class="sheet settings-sheet" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+      <div class="sheet-body">
+        <div class="settings-head">
+          <div id="settingsTitle" class="settings-title">设置</div>
+          <button id="closeSettingsBtn" class="plain">完成</button>
+        </div>
+        <div class="settings-subtitle">管理外部 LLM 节点。API Key 会加密存储在你的 Worker 后端。</div>
+
+        <div class="setting-group">
+          <div class="setting-label">LLM 配置</div>
+          <input id="llmEndpoint" class="field" placeholder="接口地址，例如 https://api.deepseek.com/v1/chat/completions">
+          <input id="llmModel" class="field" placeholder="模型名称，例如 deepseek-chat">
+          <input id="llmKey" class="field" type="password" placeholder="API Key">
+          <div class="row">
+            <button id="configStatusBtn" class="secondary grow">查看状态</button>
+            <button id="configSaveBtn" class="grow">更新配置</button>
+          </div>
+          <div id="configMsg" class="msg hide"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -517,6 +554,17 @@
       $('deleteSheet').setAttribute('aria-hidden', 'true');
     }
 
+    function openSettingsSheet() {
+      $('settingsSheet').classList.add('show');
+      $('settingsSheet').setAttribute('aria-hidden', 'false');
+      getConfig();
+    }
+
+    function closeSettingsSheet() {
+      $('settingsSheet').classList.remove('show');
+      $('settingsSheet').setAttribute('aria-hidden', 'true');
+    }
+
     async function confirmDelete() {
       const id = pendingDeleteId;
       if (!id) return closeDeleteSheet();
@@ -583,6 +631,8 @@
 
     $('loginBtn').addEventListener('click', login);
     $('logoutBtn').addEventListener('click', logout);
+    $('settingsBtn').addEventListener('click', openSettingsSheet);
+    $('closeSettingsBtn').addEventListener('click', closeSettingsSheet);
     $('saveBtn').addEventListener('click', saveMemory);
     $('searchBtn').addEventListener('click', searchMemory);
     $('refreshBtn').addEventListener('click', listMemories);
@@ -592,6 +642,9 @@
     $('confirmDeleteBtn').addEventListener('click', confirmDelete);
     $('deleteSheet').addEventListener('click', event => {
       if (event.target.id === 'deleteSheet') closeDeleteSheet();
+    });
+    $('settingsSheet').addEventListener('click', event => {
+      if (event.target.id === 'settingsSheet') closeSettingsSheet();
     });
     $('memoryList').addEventListener('click', event => {
       const btn = event.target.closest('[data-delete-id]');
