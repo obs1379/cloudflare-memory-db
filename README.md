@@ -75,17 +75,47 @@ npm run deploy
 ```
 
 ### 7. 部署前端 Pages
-前端代码位于 `app/` 目录下，直接将其部署到 Cloudflare Pages：
+
+前端默认通过本地配置文件 `app/config.js` 获取 Worker API 地址。仓库不会提交真实配置，只保留示例文件：
+
 ```bash
-wrangler pages deploy app/
+cp app/config.example.js app/config.js
 ```
+
+编辑 `app/config.js`：
+
+```js
+window.APP_CONFIG = {
+  API_BASE: 'https://your-worker.workers.dev/api'
+};
+```
+
+然后部署：
+
+```bash
+wrangler pages deploy app/ --project-name cloudflare-memory-db
+```
+
+也可以使用项目内置脚本自动生成配置并部署：
+
+```bash
+APP_API_BASE="https://your-worker.workers.dev" \
+PAGES_PROJECT_NAME="cloudflare-memory-db" \
+sh scripts/deploy-pages.sh
+```
+
+说明：
+- `APP_API_BASE` 必填；如果没有以 `/api` 结尾，脚本会自动补上。
+- `PAGES_PROJECT_NAME` 可选，默认是 `cloudflare-memory-db`。
+- `app/config.js` 已加入 `.gitignore`，不要提交真实 API 地址。
+- 如果部署时缺少 `config.js`，前端会显示 API 地址输入框作为兜底，并把手动输入的地址保存到本机浏览器。
 
 ---
 
 ## 💡 使用说明
 
 1. 访问你部署好的前端页面（例如 `https://your-project.pages.dev`）。
-2. 在页面弹出的配置框中，输入你部署好的 Worker API 地址（例如 `https://your-worker.workers.dev`）。
+2. 如果部署时已经生成 `app/config.js`，页面会直接显示登录表单；如果没有配置文件，页面会显示 API 地址输入框作为兜底。
 3. 使用你在 `wrangler secret` 中设置的 `ADMIN_USERNAME` 和 `ADMIN_PASSWORD` 登录。
 4. **（推荐）** 在页面底部的“LLM 配置”中，填入你的 DeepSeek 或 OpenAI 的 API Key 及 Base URL，以获得更强大的语义提取和对话能力。
 5. 开始记录和检索你的记忆！

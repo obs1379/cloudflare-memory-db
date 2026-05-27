@@ -1,6 +1,7 @@
 node_modules/
 dist/
 .wrangler/
+app/config.js
 *.test.js
 *.test.ts
 *.mock.test.js

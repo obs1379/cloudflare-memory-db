@@ -233,11 +233,18 @@
       .span { grid-column: 1 / -1; }
     }
   </style>
+  <script src="config.js"></script>
 </head>
 <body>
   <main class="app">
     <section id="loginView">
       <h1>记忆数据库</h1>
+      <h2 id="apiSectionTitle" class="hide">服务器配置</h2>
+      <div id="apiSection" class="card pad hide" style="margin-bottom:18px">
+        <input id="apiBase" class="field" placeholder="API 地址，例如 https://your-worker.workers.dev/api" autocomplete="url" autocapitalize="none">
+        <div class="msg" style="margin-top:0">未检测到配置文件，请输入你的 Worker API 地址。登录成功后会保存在本机。</div>
+      </div>
+
       <h2>登录</h2>
       <div class="card pad">
         <input id="username" class="field" placeholder="用户名" value="admin" autocomplete="username" autocapitalize="none">
@@ -318,7 +325,8 @@
   </div>
 
   <script>
-    const API = 'https://cloudflare-memory-db.1379top-8bd.workers.dev/api';
+    let API = '';
+    const configuredApi = (window.APP_CONFIG && window.APP_CONFIG.API_BASE ? String(window.APP_CONFIG.API_BASE) : '').trim();
     const $ = id => document.getElementById(id);
     const esc = value => String(value ?? '').replace(/[&<>"']/g, char => ({
       '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
@@ -341,6 +349,34 @@
 
     function hide(id) { $(id).classList.add('hide'); }
 
+    function normalizeApiBase(value) {
+      let api = String(value || '').trim().replace(/\/+$/, '');
+      if (api && !api.endsWith('/api')) api += '/api';
+      return api;
+    }
+
+    function hasConfiguredApi() {
+      return !!normalizeApiBase(configuredApi);
+    }
+
+    function initApiBase() {
+      if (hasConfiguredApi()) {
+        API = normalizeApiBase(configuredApi);
+        $('apiSectionTitle').classList.add('hide');
+        $('apiSection').classList.add('hide');
+        return;
+      }
+      API = normalizeApiBase(localStorage.getItem('api') || '');
+      $('apiBase').value = API;
+      $('apiSectionTitle').classList.remove('hide');
+      $('apiSection').classList.remove('hide');
+    }
+
+    function resolveApiFromForm() {
+      if (hasConfiguredApi()) return normalizeApiBase(configuredApi);
+      return normalizeApiBase($('apiBase').value || localStorage.getItem('api') || '');
+    }
+
     function setBusy(button, busy, text) {
       if (!button) return;
       if (busy) {
@@ -361,6 +397,9 @@
     }
 
     async function login() {
+      API = resolveApiFromForm();
+      if (!API) return show('loginMsg', '请输入 API 地址', 'error');
+
       const username = $('username').value.trim();
       const password = $('password').value;
       if (!username || !password) return show('loginMsg', '请输入用户名和密码', 'error');
@@ -376,6 +415,7 @@
         const data = await res.json();
         if (!data.success) throw new Error(data.error || data.message || '登录失败');
 
+        if (!hasConfiguredApi()) localStorage.setItem('api', API);
         localStorage.setItem('token', data.data?.token || '');
         localStorage.setItem('user', data.data?.username || username);
         enterApp(data.data?.username || username);
@@ -560,7 +600,8 @@
     $('password').addEventListener('keydown', event => { if (event.key === 'Enter') login(); });
     $('searchInput').addEventListener('keydown', event => { if (event.key === 'Enter') searchMemory(); });
 
-    if (localStorage.getItem('token')) enterApp(localStorage.getItem('user') || 'admin');
+    initApiBase();
+    if (localStorage.getItem('token') && API) enterApp(localStorage.getItem('user') || 'admin');
   </script>
 </body>
 </html>
