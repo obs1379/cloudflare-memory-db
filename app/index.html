@@ -2,285 +2,213 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <title>Nexus | 个人记忆中枢</title>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>记忆数据库</title>
   <style>
     :root {
-      --bg-base: #02040a;
-      --panel-bg: rgba(13, 17, 26, 0.6);
-      --panel-border: rgba(255, 255, 255, 0.06);
-      --text-main: #f1f5f9;
-      --text-muted: #8b9bb4;
-      --accent-1: #8b5cf6; /* 紫色 */
-      --accent-2: #2dd4bf; /* 青色 */
-      --danger: #ef4444;
-      --font-mono: 'JetBrains Mono', monospace;
-      --font-sans: 'Plus Jakarta Sans', sans-serif;
-      --glow: 0 0 20px rgba(139, 92, 246, 0.15);
+      /* iOS Light Mode Colors */
+      --bg-color: #F2F2F7;
+      --card-bg: #FFFFFF;
+      --text-main: #000000;
+      --text-muted: #8E8E93;
+      --tint-color: #007AFF;
+      --danger-color: #FF3B30;
+      --input-bg: rgba(118, 118, 128, 0.12);
+      --separator: rgba(60, 60, 67, 0.29);
+      --success-color: #34C759;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        /* iOS Dark Mode Colors */
+        --bg-color: #000000;
+        --card-bg: #1C1C1E;
+        --text-main: #FFFFFF;
+        --text-muted: #EBEBF599;
+        --tint-color: #0A84FF;
+        --danger-color: #FF453A;
+        --input-bg: rgba(118, 118, 128, 0.24);
+        --separator: rgba(84, 84, 88, 0.65);
+        --success-color: #32D74B;
+      }
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
     body {
-      background-color: var(--bg-base);
+      background-color: var(--bg-color);
       color: var(--text-main);
-      font-family: var(--font-sans);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
       min-height: 100vh;
-      background-image: 
-        radial-gradient(circle at 15% 50%, rgba(139, 92, 246, 0.08), transparent 25%),
-        radial-gradient(circle at 85% 30%, rgba(45, 212, 191, 0.05), transparent 25%);
-      background-attachment: fixed;
       display: flex;
       justify-content: center;
-      padding: 40px 20px;
-      line-height: 1.6;
-    }
-
-    /* 噪点遮罩 */
-    body::before {
-      content: "";
-      position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: url('data:image/svg+xml;utf8,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noiseFilter)" opacity="0.03"/%3E%3C/svg%3E');
-      pointer-events: none;
-      z-index: 999;
+      padding: 0;
+      line-height: 1.5;
+      font-size: 17px; /* iOS standard */
     }
 
     .container {
       width: 100%;
-      max-width: 760px;
-      position: relative;
-      z-index: 1;
+      max-width: 600px;
+      padding: 24px 16px 60px;
     }
 
-    /* 玻璃拟物面板 */
-    .panel {
-      background: var(--panel-bg);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid var(--panel-border);
-      border-radius: 20px;
-      padding: 32px;
-      margin-bottom: 24px;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-      animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) backwards;
-    }
-    
-    .panel:nth-child(1) { animation-delay: 0.1s; }
-    .panel:nth-child(2) { animation-delay: 0.2s; }
-    .panel:nth-child(3) { animation-delay: 0.3s; }
-    .panel:nth-child(4) { animation-delay: 0.4s; }
-
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    h1, h2 {
-      font-family: var(--font-mono);
+    /* 页面大标题 (iOS Large Title) */
+    .large-title {
+      font-size: 34px;
       font-weight: 700;
-      letter-spacing: -0.5px;
-      margin-bottom: 8px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    
-    h1 { font-size: 24px; color: #fff; }
-    h2 { font-size: 16px; color: var(--accent-2); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 20px; }
-    
-    .subtitle {
-      color: var(--text-muted);
-      font-size: 14px;
+      letter-spacing: 0.37px;
       margin-bottom: 24px;
+      margin-top: 16px;
+    }
+
+    /* 分组标题 */
+    .section-title {
+      font-size: 13px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-left: 16px;
+      margin-bottom: 8px;
+      margin-top: 24px;
+      letter-spacing: -0.08px;
+    }
+
+    /* 卡片 (iOS Grouped Table) */
+    .card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .card-padding {
+      padding: 16px;
     }
 
     /* 表单元素 */
     input, textarea {
       width: 100%;
-      background: rgba(0, 0, 0, 0.3);
-      border: 1px solid var(--panel-border);
+      background: var(--input-bg);
+      border: none;
       color: var(--text-main);
-      border-radius: 12px;
-      padding: 16px;
-      margin-bottom: 16px;
-      font-family: var(--font-sans);
-      font-size: 15px;
-      transition: all 0.3s ease;
+      border-radius: 10px;
+      padding: 12px 16px;
+      font-family: inherit;
+      font-size: 17px;
       outline: none;
+      margin-bottom: 12px;
+      transition: background 0.2s;
+    }
+    
+    input:last-child, textarea:last-child {
+      margin-bottom: 0;
     }
 
     textarea {
-      min-height: 120px;
+      min-height: 100px;
       resize: vertical;
-      line-height: 1.5;
-    }
-
-    input:focus, textarea:focus {
-      border-color: var(--accent-1);
-      box-shadow: var(--glow);
-      background: rgba(0, 0, 0, 0.5);
     }
 
     input::placeholder, textarea::placeholder {
-      color: rgba(139, 155, 180, 0.4);
+      color: var(--text-muted);
     }
 
     /* 按钮 */
     .btn {
-      background: linear-gradient(135deg, var(--accent-1), #6d28d9);
+      width: 100%;
+      background: var(--tint-color);
       color: white;
       border: none;
       border-radius: 12px;
-      padding: 14px 24px;
-      font-family: var(--font-mono);
-      font-size: 14px;
+      padding: 14px;
+      font-size: 17px;
       font-weight: 600;
       cursor: pointer;
-      transition: all 0.3s ease;
-      position: relative;
-      overflow: hidden;
-      display: inline-flex;
+      transition: transform 0.1s, opacity 0.2s;
+      display: flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
+      gap: 6px;
     }
 
-    .btn::before {
-      content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-      transition: all 0.5s ease;
+    .btn:active {
+      transform: scale(0.97);
+      opacity: 0.9;
     }
-
-    .btn:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(139, 92, 246, 0.3); }
-    .btn:hover::before { left: 100%; }
-    .btn:active { transform: translateY(0); }
 
     .btn-secondary {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid var(--panel-border);
-    }
-    .btn-secondary:hover {
-      background: rgba(255, 255, 255, 0.1);
-      box-shadow: none;
+      background: var(--input-bg);
+      color: var(--tint-color);
     }
 
     .btn-danger {
-      background: rgba(239, 68, 68, 0.1);
-      color: var(--danger);
-      border: 1px solid rgba(239, 68, 68, 0.2);
-      padding: 8px 16px;
-      font-size: 12px;
+      background: transparent;
+      color: var(--danger-color);
+      font-weight: 400;
+      padding: 0;
+      width: auto;
+      font-size: 15px;
     }
-    .btn-danger:hover { background: rgba(239, 68, 68, 0.2); box-shadow: 0 0 15px rgba(239, 68, 68, 0.2); }
+
+    .btn-text {
+      background: transparent;
+      color: var(--tint-color);
+      width: auto;
+      padding: 0;
+      font-size: 17px;
+      font-weight: 400;
+    }
 
     /* 布局工具 */
     .flex-row { display: flex; gap: 12px; align-items: center; }
     .flex-between { display: flex; justify-content: space-between; align-items: center; }
     .hide { display: none !important; }
 
-    /* 状态提示块 */
-    .status-box {
-      background: rgba(0, 0, 0, 0.4);
-      border-left: 3px solid var(--panel-border);
-      border-radius: 0 8px 8px 0;
-      padding: 16px;
-      margin-top: 16px;
-      font-size: 14px;
-      word-break: break-word;
-      animation: fadeUp 0.3s ease;
+    /* 提示信息 */
+    .msg {
+      font-size: 15px;
+      margin-top: 12px;
+      padding: 0 4px;
     }
-    .status-box.success { border-color: var(--accent-2); color: var(--accent-2); }
-    .status-box.error { border-color: var(--danger); color: #fca5a5; }
-    .status-box.info { border-color: var(--accent-1); color: var(--text-main); }
+    .msg.success { color: var(--success-color); }
+    .msg.error { color: var(--danger-color); }
+    .msg.info { color: var(--text-muted); }
 
     /* 记忆列表项 */
     .memory-item {
-      background: rgba(255, 255, 255, 0.02);
-      border: 1px solid var(--panel-border);
-      border-radius: 16px;
-      padding: 20px;
-      margin-bottom: 16px;
-      transition: all 0.3s ease;
+      padding: 16px;
+      border-bottom: 0.5px solid var(--separator);
     }
-    .memory-item:hover {
-      background: rgba(255, 255, 255, 0.04);
-      border-color: rgba(255, 255, 255, 0.1);
+    .memory-item:last-child {
+      border-bottom: none;
     }
     .memory-meta {
-      font-family: var(--font-mono);
-      font-size: 12px;
+      font-size: 13px;
       color: var(--text-muted);
-      margin-bottom: 12px;
-      display: flex;
-      gap: 16px;
-    }
-    .memory-meta span {
-      background: rgba(255,255,255,0.05);
-      padding: 4px 10px;
-      border-radius: 20px;
+      margin-bottom: 8px;
     }
     .memory-content {
-      font-size: 15px;
-      line-height: 1.7;
+      font-size: 17px;
       color: var(--text-main);
+      line-height: 1.4;
     }
     .memory-account {
-      margin-top: 12px;
+      margin-top: 8px;
       font-size: 13px;
-      color: var(--accent-2);
-      background: rgba(45, 212, 191, 0.1);
-      display: inline-block;
-      padding: 4px 12px;
-      border-radius: 6px;
+      color: var(--tint-color);
     }
 
-    /* 顶栏 */
-    .header-bar {
+    /* 顶部导航 */
+    .nav-bar {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 40px;
-    }
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    .logo-icon {
-      width: 32px; height: 32px;
-      background: linear-gradient(135deg, var(--accent-2), var(--accent-1));
-      border-radius: 8px;
-      display: flex; align-items: center; justify-content: center;
-      box-shadow: var(--glow);
-    }
-    .logo-icon::after {
-      content: ''; width: 12px; height: 12px;
-      background: var(--bg-base); border-radius: 50%;
-    }
-    .user-badge {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid var(--panel-border);
-      padding: 6px 16px;
-      border-radius: 20px;
-      font-family: var(--font-mono);
-      font-size: 12px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .user-badge::before {
-      content: ''; width: 6px; height: 6px;
-      background: var(--accent-2); border-radius: 50%;
-      box-shadow: 0 0 8px var(--accent-2);
+      margin-bottom: 16px;
     }
 
-    /* 滚动条美化 */
-    ::-webkit-scrollbar { width: 8px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
-    ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+    .user-info {
+      font-size: 15px;
+      color: var(--text-muted);
+    }
   </style>
 </head>
 <body>
@@ -288,88 +216,75 @@
 <div class="container">
   
   <!-- 登录视图 -->
-  <div id="view-login" class="panel">
-    <div class="header-bar" style="margin-bottom: 24px;">
-      <div class="logo">
-        <div class="logo-icon"></div>
-        <h1>NEXUS</h1>
-      </div>
+  <div id="view-login">
+    <h1 class="large-title">记忆数据库</h1>
+    <div class="section-title">服务器配置</div>
+    <div class="card card-padding">
+      <input id="apiUrl" placeholder="API 地址 (例如 https://api.xxx.workers.dev)" value="">
     </div>
-    <p class="subtitle">建立神经连接 / 验证身份以访问记忆中枢</p>
     
-    <input id="apiUrl" placeholder="API Endpoint (e.g. https://worker.dev/api)" value="">
-    <input id="lu" placeholder="Username" value="admin">
-    <input id="lpw" placeholder="Master Password" type="password">
-    
-    <button class="btn" onclick="doLogin()" style="width: 100%; margin-top: 8px;">INITIATE CONNECTION</button>
-    <div id="lr" class="status-box error hide"></div>
+    <div class="section-title">身份验证</div>
+    <div class="card card-padding">
+      <input id="lu" placeholder="用户名" value="admin" autocapitalize="none">
+      <input id="lpw" placeholder="密码" type="password">
+      <button class="btn" onclick="doLogin()" style="margin-top: 16px;">登录</button>
+      <div id="lr" class="msg error hide"></div>
+    </div>
   </div>
 
   <!-- 主应用视图 -->
   <div id="view-app" class="hide">
     
-    <div class="header-bar">
-      <div class="logo">
-        <div class="logo-icon"></div>
-        <h1>NEXUS</h1>
-      </div>
-      <div class="flex-row">
-        <div id="who" class="user-badge">admin</div>
-        <button class="btn btn-secondary" style="padding: 6px 12px; font-size: 12px;" onclick="doLogout()">DISCONNECT</button>
-      </div>
+    <div class="nav-bar">
+      <div class="user-info">已登录：<span id="who"></span></div>
+      <button class="btn btn-text" onclick="doLogout()">退出</button>
     </div>
+    
+    <h1 class="large-title">我的记忆</h1>
 
     <!-- 录入记忆 -->
-    <div class="panel">
-      <h2>// INGEST_MEMORY</h2>
-      <textarea id="mi" placeholder="在此输入自然语言记忆碎片... (例如：我的护照放在主卧第二个抽屉里)"></textarea>
-      <div class="flex-between">
-        <span class="subtitle" style="margin:0; font-size: 12px;">AI 引擎将自动提取实体并进行高维向量映射</span>
-        <button class="btn" id="sb" onclick="saveMemory()">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
-          STORE
-        </button>
+    <div class="section-title">添加新记忆</div>
+    <div class="card card-padding">
+      <textarea id="mi" placeholder="在这里输入自然语言... 例如：我的护照在书房抽屉里"></textarea>
+      <div class="flex-between" style="margin-top: 12px;">
+        <div id="sr" class="msg hide" style="margin:0;"></div>
+        <button class="btn" id="sb" onclick="saveMemory()" style="width: auto; padding: 8px 20px;">保存</button>
       </div>
-      <div id="sr" class="status-box hide"></div>
     </div>
 
     <!-- 检索记忆 -->
-    <div class="panel">
-      <h2>// SEMANTIC_SEARCH</h2>
+    <div class="section-title">AI 检索</div>
+    <div class="card card-padding">
       <div class="flex-row">
-        <input id="qi" placeholder="提出问题... (例如：我的护照在哪？)" style="margin-bottom: 0;">
-        <button class="btn" onclick="searchMemory()">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-        </button>
+        <input id="qi" placeholder="提问... 例如：我的护照在哪？" style="margin-bottom: 0;">
+        <button class="btn" onclick="searchMemory()" style="width: auto; padding: 12px 20px;">搜索</button>
       </div>
-      <div id="qr" class="status-box hide"></div>
+      <div id="qr" class="msg hide" style="margin-top: 16px; padding-top: 16px; border-top: 0.5px solid var(--separator);"></div>
     </div>
 
     <!-- 记忆列表 -->
-    <div class="panel">
-      <div class="flex-between" style="margin-bottom: 20px;">
-        <h2 style="margin: 0;">// MEMORY_ARCHIVE</h2>
-        <button class="btn btn-secondary" style="padding: 6px 12px; font-size: 12px;" onclick="listMemories()">REFRESH</button>
-      </div>
-      <div id="lr2">
-        <div class="subtitle">点击 REFRESH 加载记忆档案...</div>
+    <div class="flex-between" style="margin-top: 24px;">
+      <div class="section-title" style="margin-top: 0;">全部记忆</div>
+      <button class="btn btn-text" style="font-size: 15px; margin-right: 16px;" onclick="listMemories()">刷新</button>
+    </div>
+    <div class="card" id="lr2">
+      <div class="card-padding">
+        <div class="msg info">加载中...</div>
       </div>
     </div>
 
     <!-- 系统配置 -->
-    <div class="panel">
-      <h2>// SYSTEM_CONFIG</h2>
-      <p class="subtitle" style="margin-bottom: 16px;">配置外部 LLM 节点以强化解析能力</p>
-      <input id="le" placeholder="Endpoint URL (e.g. https://api.deepseek.com/v1/chat/completions)">
-      <div class="flex-row" style="margin-bottom: 16px;">
-        <input id="lm" placeholder="Model ID" style="margin-bottom: 0;">
-        <input id="lk" type="password" placeholder="API Key" style="margin-bottom: 0;">
+    <div class="section-title">LLM 节点配置</div>
+    <div class="card card-padding">
+      <input id="le" placeholder="API Endpoint (例如 https://api.deepseek.com)">
+      <input id="lm" placeholder="模型名称 (例如 deepseek-chat)">
+      <input id="lk" type="password" placeholder="API Key">
+      
+      <div class="flex-row" style="margin-top: 16px;">
+        <button class="btn btn-secondary" onclick="getConfig()">查看状态</button>
+        <button class="btn" onclick="updateConfig()">更新配置</button>
       </div>
-      <div class="flex-row">
-        <button class="btn btn-secondary" onclick="getConfig()">CHECK_STATUS</button>
-        <button class="btn" onclick="updateConfig()">UPDATE_NODE</button>
-      </div>
-      <div id="cr" class="status-box hide"></div>
+      <div id="cr" class="msg hide"></div>
     </div>
 
   </div>
@@ -381,7 +296,7 @@ const qs = id => document.getElementById(id);
 const esc = s => String(s||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[m]));
 const show = (id, html, type = 'info') => {
   const el = qs(id);
-  el.className = `status-box ${type}`;
+  el.className = `msg ${type}`;
   el.innerHTML = html;
 };
 const hide = id => qs(id).classList.add('hide');
@@ -394,17 +309,18 @@ const hdr = () => {
 
 async function doLogin() {
   API = qs('apiUrl').value.trim().replace(/\/+$/, '');
-  if(!API) return show('lr', 'ERR: Endpoint URL required', 'error');
+  if(!API) return show('lr', '请输入 API 地址', 'error');
   const u = qs('lu').value.trim(), p = qs('lpw').value;
-  if(!u || !p) return show('lr', 'ERR: Credentials required', 'error');
+  if(!u || !p) return show('lr', '请输入用户名和密码', 'error');
   
-  const originalBtn = qs('lr').previousElementSibling.innerHTML;
-  qs('lr').previousElementSibling.innerHTML = 'CONNECTING...';
+  const btn = qs('lr').previousElementSibling;
+  const originalText = btn.innerText;
+  btn.innerText = '登录中...';
   
   try {
     const r = await fetch(API+'/login', { method:'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({username:u, master_password:p}) });
     const d = await r.json();
-    if(!d.success) throw new Error(d.error || 'Authentication failed');
+    if(!d.success) throw new Error(d.error || '登录失败，请检查账号密码或 API 地址');
     
     if(d.data?.token) localStorage.setItem('token', d.data.token);
     localStorage.setItem('user', d.data.username);
@@ -413,11 +329,11 @@ async function doLogin() {
     qs('who').textContent = d.data.username;
     qs('view-login').classList.add('hide');
     qs('view-app').classList.remove('hide');
-    listMemories(); // 自动加载列表
+    listMemories();
   } catch(e) {
-    show('lr', `ERR: ${e.message}`, 'error');
+    show('lr', e.message, 'error');
   } finally {
-    qs('lr').previousElementSibling.innerHTML = 'INITIATE CONNECTION';
+    btn.innerText = originalText;
   }
 }
 
@@ -445,83 +361,82 @@ async function saveMemory() {
   const t = qs('mi').value.trim();
   if(!t) return;
   const btn = qs('sb');
-  btn.innerHTML = 'PROCESSING...';
+  btn.innerText = '处理中...';
   try {
     const r = await fetch(API+'/memory', { method:'POST', headers:hdr(), body:JSON.stringify({text:t}) });
     const d = await r.json();
     if(d.success) {
-      show('sr', 'SUCCESS: Memory ingested and vectorized.', 'success');
+      show('sr', '已保存', 'success');
       qs('mi').value = '';
       listMemories();
+      setTimeout(() => hide('sr'), 3000);
     } else {
-      throw new Error(d.error || d.message || 'Ingestion failed');
+      throw new Error(d.error || d.message || '保存失败');
     }
   } catch(e) {
-    show('sr', `ERR: ${esc(e.message)}`, 'error');
+    show('sr', e.message, 'error');
   } finally {
-    btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg> STORE';
+    btn.innerText = '保存';
   }
 }
 
 async function searchMemory() {
   const q = qs('qi').value.trim();
   if(!q) return;
-  show('qr', '<span style="color:var(--accent-2); animation: pulse 1.5s infinite;">SCANNING NEURAL NET...</span>', 'info');
+  show('qr', 'AI 正在思考...', 'info');
   try {
     const r = await fetch(API+'/memory/search?q='+encodeURIComponent(q), { headers:hdr() });
     const d = await r.json();
     if(d.success) {
-      show('qr', esc(d.answer).replace(/\n/g, '<br>'), 'info');
+      show('qr', esc(d.answer).replace(/\n/g, '<br>'), 'text-main');
+      qs('qr').style.color = 'var(--text-main)';
     } else {
-      throw new Error(d.error || 'Search failed');
+      throw new Error(d.error || '检索失败');
     }
   } catch(e) {
-    show('qr', `ERR: ${esc(e.message)}`, 'error');
+    show('qr', e.message, 'error');
   }
 }
 
 async function deleteMemory(id) {
-  if(!confirm('PURGE DIRECTIVE: Are you sure you want to permanently delete this memory?')) return;
+  if(!confirm('确定要删除这条记忆吗？')) return;
   try {
     const r = await fetch(API+'/memory/'+id, { method:'DELETE', headers:hdr() });
     const d = await r.json();
     if(d.success) listMemories();
-    else alert('Delete failed: ' + d.error);
+    else alert('删除失败: ' + d.error);
   } catch(e) {
-    alert('Network error');
+    alert('网络错误');
   }
 }
 
 async function listMemories() {
-  qs('lr2').innerHTML = '<div class="subtitle">FETCHING ARCHIVE...</div>';
+  qs('lr2').innerHTML = '<div class="card-padding"><div class="msg info">加载中...</div></div>';
   try {
     const r = await fetch(API+'/memories?limit=50', { headers:hdr() });
     const d = await r.json();
-    if(!d.success) throw new Error(d.error || 'Fetch failed');
+    if(!d.success) throw new Error(d.error || '获取失败');
     const a = d.data.memories || [];
     if(!a.length) {
-      qs('lr2').innerHTML = '<div class="subtitle">Archive is empty.</div>';
+      qs('lr2').innerHTML = '<div class="card-padding"><div class="msg info">暂无记忆</div></div>';
       return;
     }
-    let h = `<div class="subtitle" style="margin-bottom:16px;">Total records: ${a.length}</div>`;
+    let h = '';
     a.forEach(m => {
       h += `
         <div class="memory-item">
-          <div class="flex-between" style="margin-bottom: 12px; align-items: flex-start;">
-            <div class="memory-meta">
-              <span>${esc(m.platform || 'UNKNOWN')}</span>
-              <span>${esc((m.created_at || '').slice(0,10))}</span>
-            </div>
-            <button class="btn btn-danger" onclick="deleteMemory('${m.id}')">PURGE</button>
+          <div class="flex-between memory-meta">
+            <span>${esc(m.platform || '未分类')} · ${esc((m.created_at || '').slice(0,10))}</span>
+            <button class="btn-danger" onclick="deleteMemory('${m.id}')">删除</button>
           </div>
           <div class="memory-content">${esc(m.raw_input || '')}</div>
-          ${m.account ? `<div class="memory-account">ID: ${esc(m.account)}</div>` : ''}
+          ${m.account ? `<div class="memory-account">账号: ${esc(m.account)}</div>` : ''}
         </div>
       `;
     });
     qs('lr2').innerHTML = h;
   } catch(e) {
-    qs('lr2').innerHTML = `<div class="status-box error">ERR: ${esc(e.message)}</div>`;
+    qs('lr2').innerHTML = `<div class="card-padding"><div class="msg error">${esc(e.message)}</div></div>`;
   }
 }
 
@@ -529,18 +444,18 @@ async function getConfig() {
   try {
     const r = await fetch(API+'/config', { headers:hdr() });
     const d = await r.json();
-    if(!d.success) throw new Error(d.error || 'Config fetch failed');
+    if(!d.success) throw new Error(d.error || '获取配置失败');
     const c = d.data || {};
     let html = `
-      <div style="font-family:var(--font-mono); font-size:13px; line-height:1.8;">
-        <div><span style="color:var(--text-muted)">ENDPOINT:</span> ${esc(c.llm_endpoint) || 'NOT_SET'}</div>
-        <div><span style="color:var(--text-muted)">MODEL:</span> ${esc(c.llm_model) || 'NOT_SET'}</div>
-        <div><span style="color:var(--text-muted)">AUTH_KEY:</span> ${c.has_key ? '<span style="color:var(--accent-2)">[SECURE_STORE_ACTIVE]</span>' : '<span style="color:#fca5a5">[UNCONFIGURED]</span>'}</div>
+      <div style="margin-top: 12px; font-size: 15px;">
+        <div style="margin-bottom: 4px;"><span style="color:var(--text-muted)">接口:</span> ${esc(c.llm_endpoint) || '未设置'}</div>
+        <div style="margin-bottom: 4px;"><span style="color:var(--text-muted)">模型:</span> ${esc(c.llm_model) || '未设置'}</div>
+        <div><span style="color:var(--text-muted)">密钥:</span> ${c.has_key ? '<span style="color:var(--success-color)">已配置</span>' : '<span style="color:var(--danger-color)">未配置</span>'}</div>
       </div>
     `;
     show('cr', html, 'info');
   } catch(e) {
-    show('cr', `ERR: ${esc(e.message)}`, 'error');
+    show('cr', e.message, 'error');
   }
 }
 
@@ -551,17 +466,25 @@ async function updateConfig() {
     llm_key: qs('lk').value.trim()
   };
   if(!body.llm_endpoint && !body.llm_model && !body.llm_key) return;
+  
+  const btn = event.target;
+  const originalText = btn.innerText;
+  btn.innerText = '更新中...';
+  
   try {
     const r = await fetch(API+'/config', { method:'POST', headers:hdr(), body:JSON.stringify(body) });
     const d = await r.json();
     if(d.success) {
-      show('cr', 'SUCCESS: Node configuration updated.', 'success');
+      show('cr', '配置已更新', 'success');
       qs('le').value = ''; qs('lm').value = ''; qs('lk').value = '';
+      setTimeout(() => hide('cr'), 3000);
     } else {
-      throw new Error(d.error || 'Update failed');
+      throw new Error(d.error || '更新失败');
     }
   } catch(e) {
-    show('cr', `ERR: ${esc(e.message)}`, 'error');
+    show('cr', e.message, 'error');
+  } finally {
+    btn.innerText = originalText;
   }
 }
 </script>
