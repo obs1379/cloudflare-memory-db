@@ -1,0 +1,2 @@
+#!/bin/sh
+ssh -i ~/.ssh/id_debian_ed25519 -6 root@ssh.137966.xyz 'cd /DATA/DockerDev/cloudflare-memory-db && rm -f *.check.js && rm -rf test-client/ && find src -name "*.test.js" -o -name "*.test.ts" -o -name "*.test.app.ts" -type f -delete && rm -f src/routes/*.test.js src/routes/*.test.ts src/utils/*.test.js src/utils/*.test.ts && rm -f src/routes/test-ai.ts && sed -i "/test-ai/d" src/index.ts && git add -A && git commit -m "chore: clean up test files, scripts, and test-client" && git push origin main'

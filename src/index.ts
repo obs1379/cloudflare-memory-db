@@ -27,7 +27,6 @@ app.post('/api/login', login);
 app.post('/api/logout', logout);
 
 // 诊断端点
-app.get('/api/test-ai', async (c) => {
   try {
     const r1: any = await c.env.AI.run('@cf/baai/bge-base-en-v1.5', { text: ['hello'] });
     return c.json({ data0Len: r1?.data?.[0]?.length });
