@@ -24,9 +24,5 @@ index_name = "memory-vector-index"
 [ai]
 binding = "AI"
 
-[vars]
-APP_AUTH_TOKEN = "aRHMw1B7pFowQ0BBhlCOS6Oj8NMHGzAogMa0q0q-wS8"
-ADMIN_USERNAME = "admin"
-ADMIN_PASSWORD = "123456"
-SESSION_SECRET = "cloudfMemoryDB-session-2026-05-27"
-ENCRYPTION_KEY = "cloudfMemoryDB-enc-key-20260527aa"
+# Sensitive runtime values are configured with `wrangler secret put`:
+# APP_AUTH_TOKEN, ADMIN_USERNAME, ADMIN_PASSWORD, SESSION_SECRET, ENCRYPTION_KEY

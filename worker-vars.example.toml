@@ -1,6 +1,8 @@
-[vars]
-APP_AUTH_TOKEN = "aRHMw1B7pFowQ0BBhlCOS6Oj8NMHGzAogMa0q0q-wS8"
-ADMIN_USERNAME = "admin"
-ADMIN_PASSWORD = "123456"
-ENCRYPTION_KEY = "replace-with-random-32bytes"
-SESSION_SECRET = "replace-with-random-session-secret"
+# Copy this file for local reference only. Do NOT put real values in wrangler.toml.
+# Configure production values with `wrangler secret put <NAME>`.
+
+APP_AUTH_TOKEN="change-me-random-token"
+ADMIN_USERNAME="admin"
+ADMIN_PASSWORD="change-me-strong-password"
+SESSION_SECRET="change-me-random-session-secret"
+ENCRYPTION_KEY="change-me-keep-stable-after-first-deploy"

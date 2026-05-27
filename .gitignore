@@ -2,6 +2,7 @@ node_modules/
 dist/
 .wrangler/
 app/config.js
+.runtime-secrets.json
 *.test.js
 *.test.ts
 *.mock.test.js
