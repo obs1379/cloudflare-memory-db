@@ -1,7 +1,7 @@
 {
   "name": "cloudflare-memory-db",
   "version": "1.0.0",
-  "description": "基于 Cloudflare 生态 (Workers, D1, Vectorize, R2) 构建的轻量级、安全、多端同步的个人记忆与知识管理系统。",
+  "description": "基于 Cloudflare Workers、D1、Vectorize、KV 和 Workers AI 构建的轻量级对话式个人记忆数据库。",
   "main": "index.js",
   "scripts": {
     "dev": "wrangler dev",
