@@ -1,0 +1,35 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>记忆数据库</title><style>*{box-sizing:border-box}body{margin:0;background:#0f172a;color:#e2e8f0;font-family:-apple-system,BlinkMacSystemFont,sans-serif}.w{max-width:880px;margin:0 auto;padding:24px}.c{background:#111827;border:1px solid #1f2937;border-radius:14px;padding:16px;margin:14px 0}input,textarea{width:100%;background:#0b1220;border:1px solid #334155;color:#e2e8f0;border-radius:10px;padding:12px;margin:8px 0;font-size:14px}textarea{min-height:100px;resize:vertical}.btn{border:0;border-radius:10px;padding:10px 14px;color:#fff;background:#2563eb;cursor:pointer;font-size:14px}.btn2{background:#334155}.btn3{background:#ef4444}.row{display:flex;gap:10px;align-items:center;justify-content:space-between}.hide{display:none}.r{background:#0b1220;border:1px solid #334155;border-radius:10px;padding:12px;margin-top:10px;white-space:pre-wrap}.ok{color:#6ee7b7}.bad{color:#fca5a5}.m{color:#94a3b8;font-size:12px}.it{background:#1e293b;border:1px solid #334155;border-radius:10px;padding:12px;margin:8px 0}.hd{display:flex;justify-content:space-between;align-items:center}</style></head><body><div class="w"><div id="lp" class="c"><h1>🔐 记忆数据库</h1><p class="m">输入 API 地址和用户名密码登录</p><input id="apiUrl" placeholder="API 地址，例如 https://your-worker.workers.dev/api" value=""><input id="lu" placeholder="用户名" value="admin"><input id="lpw" placeholder="密码" type="password"><button class="btn" onclick="doLogin()">登录</button><div id="lr" class="r hide"></div></div><div id="ap" class="hide"><div class="hd"><div><h1>📖 记忆数据库</h1><div id="who" class="m"></div></div><button class="btn btn2" onclick="doLogout()">退出</button></div><div class="c"><h2>💾 保存记忆</h2><textarea id="mi" placeholder="输入自然语言记忆..."></textarea><button class="btn" id="sb" onclick="saveMemory()">保存</button><div id="sr" class="r hide"></div></div><div class="c"><h2>🔍 检索记忆</h2><input id="qi" placeholder="例如：我的微博密码是什么"><button class="btn" onclick="searchMemory()">搜索</button><div id="qr" class="r hide"></div></div><div class="c"><div class="hd"><h2>📋 记忆列表</h2><button class="btn btn2" onclick="listMemories()">刷新</button></div><div id="lr2" class="r hide"></div></div><div class="c"><h2>⚙️ LLM 配置</h2><input id="le" placeholder="端点，例如 https://api.deepseek.com/v1/chat/completions"><input id="lm" placeholder="模型，例如 deepseek-chat"><input id="lk" type="password" placeholder="API Key"><div class="hd"><button class="btn btn2" onclick="getConfig()">查看</button><button class="btn" onclick="updateConfig()">更新</button></div><div id="cr" class="r hide"></div></div></div></div><script>
+var API='';
+function qs(id){return document.getElementById(id)}
+function esc(s){return String(s||'').replace(/[&<>"']/g,function(m){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[m]})}
+function show(id,html){var el=qs(id);el.classList.remove('hide');el.innerHTML=html}
+function hdr(){var h={'Content-Type':'application/json'};var t=localStorage.getItem('token');if(t)h['Authorization']='Bearer '+t;return h}
+
+async function doLogin(){
+  API=qs('apiUrl').value.trim().replace(/\/+$/,'');
+  if(!API)return show('lr','<span class=bad>请输入 API 地址</span>');
+  var u=qs('lu').value.trim(),p=qs('lpw').value;
+  if(!u||!p)return show('lr','<span class=bad>请输入用户名和密码</span>');
+  var r=await fetch(API+'/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,master_password:p})});
+  var d=await r.json();
+  if(!d.success)return show('lr','<span class=bad>'+(d.error||'登录失败')+'</span>');
+  var tk=d.data&&d.data.token;
+  if(tk)localStorage.setItem('token',tk);
+  localStorage.setItem('user',d.data.username);
+  localStorage.setItem('api',API);
+  qs('who').textContent='已登录: '+d.data.username;
+  qs('lp').classList.add('hide');qs('ap').classList.remove('hide');
+}
+
+function doLogout(){localStorage.removeItem('token');localStorage.removeItem('user');location.reload()}
+
+function init(){var saved=localStorage.getItem('api');if(saved)qs('apiUrl').value=saved;var t=localStorage.getItem('token');if(t&&saved){API=saved;var u=localStorage.getItem('user')||'admin';qs('who').textContent='已登录: '+u;qs('lp').classList.add('hide');qs('ap').classList.remove('hide')}}
+init();
+
+async function saveMemory(){var t=qs('mi').value.trim();if(!t)return;var r=await fetch(API+'/memory',{method:'POST',headers:hdr(),body:JSON.stringify({text:t})});var d=await r.json();show('sr',d.success?'<span class=ok>✅ 记忆已保存</span>':'<span class=bad>❌ '+esc(d.error||d.message||'失败')+'</span>');if(d.success)qs('mi').value=''}
+async function searchMemory(){var q=qs('qi').value.trim();if(!q)return;show('qr','<span class=m>搜索中...</span>');var r=await fetch(API+'/memory/search?q='+encodeURIComponent(q),{headers:hdr()});var d=await r.json();show('qr',d.success?'<div class=ok>💬 '+esc(d.answer)+'</div>':'<span class=bad>❌ '+esc(d.error||'失败')+'</span>')}
+async function deleteMemory(id){if(!confirm('确定删除？'))return;var r=await fetch(API+'/memory/'+id,{method:'DELETE',headers:hdr()});var d=await r.json();if(d.success)listMemories();else show('lr2','<span class=bad>❌ '+esc(d.error||'失败')+'</span>')}
+async function listMemories(){var r=await fetch(API+'/memories?limit=50',{headers:hdr()});var d=await r.json();if(!d.success)return show('lr2','<span class=bad>❌ '+esc(d.error||'失败')+'</span>');var a=d.data.memories||[];if(!a.length)return show('lr2','<span class=m>暂无记忆</span>');var h='<div class=m>共 '+a.length+' 条</div>';a.forEach(function(m){h+='<div class=it><div class=hd><div class=m>'+(esc(m.platform||'未分类'))+' · '+esc((m.created_at||'').slice(0,10))+'</div><button class="btn btn3" onclick="deleteMemory(\''+m.id+'\')">删除</button></div><div>'+esc(m.raw_input||'')+'</div>'+(m.account?'<div class=m>账号: '+esc(m.account)+'</div>':'')+'</div>'});show('lr2',h)}
+async function getConfig(){var r=await fetch(API+'/config',{headers:hdr()});var d=await r.json();if(!d.success)return show('cr','<span class=bad>❌ '+esc(d.error||'失败')+'</span>');var c=d.data||{};show('cr',(c.llm_endpoint?'端点: '+esc(c.llm_endpoint)+'<br>':'')+(c.llm_model?'模型: '+esc(c.llm_model)+'<br>':'')+'API Key: '+(c.has_key?'<span class=ok>已配置</span>':'<span class=bad>未配置</span>'))}
+async function updateConfig(){var body={llm_endpoint:qs('le').value.trim(),llm_model:qs('lm').value.trim(),llm_key:qs('lk').value.trim()};if(!body.llm_endpoint&&!body.llm_model&&!body.llm_key)return;var r=await fetch(API+'/config',{method:'POST',headers:hdr(),body:JSON.stringify(body)});var d=await r.json();show('cr',d.success?'<span class=ok>✅ 配置已更新</span>':'<span class=bad>❌ '+esc(d.error||'失败')+'</span>')}
+</script></body></html>

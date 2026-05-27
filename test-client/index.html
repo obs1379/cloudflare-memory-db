@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cloudflare Memory DB API Test</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; padding: 24px; line-height: 1.6; }
+    input, textarea, button { width: 100%; margin: 8px 0; padding: 10px; box-sizing: border-box; }
+    button { cursor: pointer; }
+    pre { background: #f5f5f5; padding: 12px; overflow: auto; white-space: pre-wrap; }
+    .row { margin-bottom: 20px; border: 1px solid #ddd; padding: 16px; border-radius: 10px; }
+  </style>
+</head>
+<body>
+  <h1>Cloudflare Memory DB - API 联调页</h1>
+  <p>用于快速测试核心接口：保存记忆、检索记忆、查看同步结果。</p>
+
+  <div class="row">
+    <h2>基础配置</h2>
+    <input id="baseUrl" placeholder="API Base URL，例如 https://your-worker.xxx.workers.dev/api" />
+    <input id="token" placeholder="Bearer Token，例如 test-token-123" />
+  </div>
+
+  <div class="row">
+    <h2>1. 保存记忆</h2>
+    <textarea id="memoryText" rows="4" placeholder="例如：帮我记住，我的 GitHub 密码是 Abc123"></textarea>
+    <button onclick="createMemory()">调用 POST /memory</button>
+  </div>
+
+  <div class="row">
+    <h2>2. 检索记忆</h2>
+    <input id="searchQuery" placeholder="例如：我的 GitHub 密码是什么？" />
+    <button onclick="searchMemory()">调用 GET /memory/search</button>
+  </div>
+
+  <div class="row">
+    <h2>3. 增量同步</h2>
+    <input id="since" placeholder="例如：2026-05-18T00:00:00.000Z" />
+    <button onclick="syncData()">调用 GET /sync</button>
+  </div>
+
+  <div class="row">
+    <h2>响应结果</h2>
+    <pre id="output">等待请求...</pre>
+  </div>
+
+  <script>
+    function headers() {
+      const token = document.getElementById('token').value.trim();
+      return {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + token
+      };
+    }
+
+    async function createMemory() {
+      const baseUrl = document.getElementById('baseUrl').value.trim();
+      const text = document.getElementById('memoryText').value.trim();
+      const res = await fetch(baseUrl + '/memory', {
+        method: 'POST',
+        headers: headers(),
+        body: JSON.stringify({ text })
+      });
+      const data = await res.json();
+      document.getElementById('output').textContent = JSON.stringify(data, null, 2);
+    }
+
+    async function searchMemory() {
+      const baseUrl = document.getElementById('baseUrl').value.trim();
+      const q = encodeURIComponent(document.getElementById('searchQuery').value.trim());
+      const res = await fetch(baseUrl + '/memory/search?q=' + q, {
+        method: 'GET',
+        headers: headers()
+      });
+      const data = await res.json();
+      document.getElementById('output').textContent = JSON.stringify(data, null, 2);
+    }
+
+    async function syncData() {
+      const baseUrl = document.getElementById('baseUrl').value.trim();
+      const since = encodeURIComponent(document.getElementById('since').value.trim());
+      const res = await fetch(baseUrl + '/sync?since=' + since, {
+        method: 'GET',
+        headers: headers()
+      });
+      const data = await res.json();
+      document.getElementById('output').textContent = JSON.stringify(data, null, 2);
+    }
+  </script>
+</body>
+</html>

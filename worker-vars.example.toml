@@ -1,0 +1,6 @@
+[vars]
+APP_AUTH_TOKEN = "aRHMw1B7pFowQ0BBhlCOS6Oj8NMHGzAogMa0q0q-wS8"
+ADMIN_USERNAME = "admin"
+ADMIN_PASSWORD = "123456"
+ENCRYPTION_KEY = "replace-with-random-32bytes"
+SESSION_SECRET = "replace-with-random-session-secret"
