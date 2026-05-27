@@ -14,12 +14,13 @@ export interface Env {
   APP_AUTH_TOKEN: string;
   ADMIN_USERNAME?: string;
   ADMIN_PASSWORD?: string;
-  ENCRYPTION_KEY?: string;
-  SESSION_SECRET?: string;
+  ENCRYPTION_KEY: string;
+  SESSION_SECRET: string;
 }
 
 export interface AppVariables {
   user_id: string;
+  username: string;
 }
 
 export interface UserConfig {

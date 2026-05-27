@@ -1,7 +1,7 @@
 import { Context, Next } from 'hono';
 import { parseCookie, verifySession } from './session';
 
-export async function authMiddleware(c: Context, next: Next) {
+export async function authMiddleware(c: Context<{ Bindings: any; Variables: { user_id: string; username: string } }>, next: Next) {
   const secret = c.env.SESSION_SECRET;
 
   // 1. Cookie session

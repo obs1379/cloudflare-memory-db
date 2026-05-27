@@ -1,7 +1,7 @@
 import { Context } from 'hono';
-import { Env } from '../types';
+import { Env, AppVariables } from '../types';
 
-export async function listMemories(c: Context<{ Bindings: Env }>) {
+export async function listMemories(c: Context<{ Bindings: Env; Variables: AppVariables }>) {
   const userId = c.get('user_id');
   const page = Math.max(1, parseInt(c.req.query('page') || '1'));
   const limit = Math.min(50, Math.max(1, parseInt(c.req.query('limit') || '20')));

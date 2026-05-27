@@ -2,480 +2,565 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
   <title>记忆数据库</title>
   <style>
     :root {
-      /* iOS Light Mode Colors */
-      --bg-color: #F2F2F7;
-      --card-bg: #FFFFFF;
-      --text-main: #000000;
-      --text-muted: #8E8E93;
-      --tint-color: #007AFF;
-      --danger-color: #FF3B30;
-      --input-bg: rgba(118, 118, 128, 0.12);
-      --separator: rgba(60, 60, 67, 0.29);
-      --success-color: #34C759;
+      color-scheme: light dark;
+      --bg: #f2f2f7;
+      --card: #ffffff;
+      --card-2: #ffffff;
+      --text: #111111;
+      --muted: #8e8e93;
+      --muted-2: #6e6e73;
+      --blue: #007aff;
+      --red: #ff3b30;
+      --green: #34c759;
+      --input: rgba(118, 118, 128, .12);
+      --line: rgba(60, 60, 67, .18);
+      --shadow: 0 12px 28px rgba(0, 0, 0, .05);
     }
 
     @media (prefers-color-scheme: dark) {
       :root {
-        /* iOS Dark Mode Colors */
-        --bg-color: #000000;
-        --card-bg: #1C1C1E;
-        --text-main: #FFFFFF;
-        --text-muted: #EBEBF599;
-        --tint-color: #0A84FF;
-        --danger-color: #FF453A;
-        --input-bg: rgba(118, 118, 128, 0.24);
-        --separator: rgba(84, 84, 88, 0.65);
-        --success-color: #32D74B;
+        --bg: #000000;
+        --card: #1c1c1e;
+        --card-2: #2c2c2e;
+        --text: #ffffff;
+        --muted: rgba(235, 235, 245, .6);
+        --muted-2: rgba(235, 235, 245, .72);
+        --blue: #0a84ff;
+        --red: #ff453a;
+        --green: #32d74b;
+        --input: rgba(118, 118, 128, .24);
+        --line: rgba(84, 84, 88, .55);
+        --shadow: none;
       }
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-
+    * { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; }
     body {
-      background-color: var(--bg-color);
-      color: var(--text-main);
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+      margin: 0;
       min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      padding: 0;
-      line-height: 1.5;
-      font-size: 17px; /* iOS standard */
-    }
-
-    .container {
-      width: 100%;
-      max-width: 600px;
-      padding: 24px 16px 60px;
-    }
-
-    /* 页面大标题 (iOS Large Title) */
-    .large-title {
-      font-size: 34px;
-      font-weight: 700;
-      letter-spacing: 0.37px;
-      margin-bottom: 24px;
-      margin-top: 16px;
-    }
-
-    /* 分组标题 */
-    .section-title {
-      font-size: 13px;
-      text-transform: uppercase;
-      color: var(--text-muted);
-      margin-left: 16px;
-      margin-bottom: 8px;
-      margin-top: 24px;
-      letter-spacing: -0.08px;
-    }
-
-    /* 卡片 (iOS Grouped Table) */
-    .card {
-      background: var(--card-bg);
-      border-radius: 12px;
-      overflow: hidden;
-    }
-
-    .card-padding {
-      padding: 16px;
-    }
-
-    /* 表单元素 */
-    input, textarea {
-      width: 100%;
-      background: var(--input-bg);
-      border: none;
-      color: var(--text-main);
-      border-radius: 10px;
-      padding: 12px 16px;
-      font-family: inherit;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
       font-size: 17px;
-      outline: none;
-      margin-bottom: 12px;
-      transition: background 0.2s;
-    }
-    
-    input:last-child, textarea:last-child {
-      margin-bottom: 0;
+      line-height: 1.42;
+      -webkit-font-smoothing: antialiased;
     }
 
-    textarea {
-      min-height: 100px;
-      resize: vertical;
-    }
-
-    input::placeholder, textarea::placeholder {
-      color: var(--text-muted);
-    }
-
-    /* 按钮 */
-    .btn {
+    .app {
       width: 100%;
-      background: var(--tint-color);
-      color: white;
-      border: none;
-      border-radius: 12px;
-      padding: 14px;
-      font-size: 17px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: transform 0.1s, opacity 0.2s;
+      max-width: 720px;
+      margin: 0 auto;
+      padding: calc(env(safe-area-inset-top) + 18px) 16px calc(env(safe-area-inset-bottom) + 44px);
+    }
+
+    .topbar {
+      min-height: 32px;
       display: flex;
       align-items: center;
-      justify-content: center;
-      gap: 6px;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 10px;
     }
 
-    .btn:active {
-      transform: scale(0.97);
-      opacity: 0.9;
-    }
-
-    .btn-secondary {
-      background: var(--input-bg);
-      color: var(--tint-color);
-    }
-
-    .btn-danger {
-      background: transparent;
-      color: var(--danger-color);
-      font-weight: 400;
-      padding: 0;
-      width: auto;
+    .user {
+      color: var(--muted);
       font-size: 15px;
+      min-width: 0;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
     }
 
-    .btn-text {
-      background: transparent;
-      color: var(--tint-color);
-      width: auto;
-      padding: 0;
-      font-size: 17px;
-      font-weight: 400;
+    h1 {
+      margin: 0 0 20px;
+      font-size: 34px;
+      line-height: 1.08;
+      letter-spacing: .2px;
+      font-weight: 760;
     }
 
-    /* 布局工具 */
-    .flex-row { display: flex; gap: 12px; align-items: center; }
-    .flex-between { display: flex; justify-content: space-between; align-items: center; }
+    h2 {
+      margin: 26px 16px 8px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.2;
+      font-weight: 500;
+      letter-spacing: .02em;
+      text-transform: uppercase;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+
+    .card.pad { padding: 16px; }
+
+    .field, textarea {
+      display: block;
+      width: 100%;
+      border: 0;
+      outline: 0;
+      border-radius: 12px;
+      background: var(--input);
+      color: var(--text);
+      font: inherit;
+      padding: 12px 14px;
+      margin: 0 0 12px;
+      appearance: none;
+    }
+
+    .field:last-child, textarea:last-child { margin-bottom: 0; }
+    textarea { min-height: 108px; resize: vertical; }
+    ::placeholder { color: var(--muted); opacity: 1; }
+
+    .row { display: flex; align-items: center; gap: 10px; }
+    .between { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .grow { flex: 1; min-width: 0; }
     .hide { display: none !important; }
 
-    /* 提示信息 */
+    button {
+      border: 0;
+      border-radius: 12px;
+      background: var(--blue);
+      color: #fff;
+      font: inherit;
+      font-weight: 600;
+      padding: 12px 16px;
+      cursor: pointer;
+      touch-action: manipulation;
+      transition: transform .12s ease, opacity .12s ease, background .12s ease;
+      user-select: none;
+    }
+
+    button:active { transform: scale(.97); opacity: .86; }
+    button:disabled { opacity: .45; cursor: default; }
+
+    .primary { width: 100%; margin-top: 6px; }
+    .secondary { background: var(--input); color: var(--blue); }
+    .plain { background: transparent; color: var(--blue); padding: 4px 0; font-weight: 400; border-radius: 8px; }
+    .danger { background: transparent; color: var(--red); padding: 4px 0; font-size: 15px; font-weight: 400; border-radius: 8px; }
+    .small { padding: 9px 16px; font-size: 16px; }
+
     .msg {
-      font-size: 15px;
       margin-top: 12px;
-      padding: 0 4px;
+      color: var(--muted-2);
+      font-size: 15px;
+      word-break: break-word;
     }
-    .msg.success { color: var(--success-color); }
-    .msg.error { color: var(--danger-color); }
-    .msg.info { color: var(--text-muted); }
+    .msg.success { color: var(--green); }
+    .msg.error { color: var(--red); }
+    .msg.answer {
+      color: var(--text);
+      padding-top: 14px;
+      border-top: .5px solid var(--line);
+      white-space: pre-wrap;
+    }
 
-    /* 记忆列表项 */
-    .memory-item {
+    .list-empty { padding: 16px; color: var(--muted); font-size: 15px; }
+
+    .memory {
       padding: 16px;
-      border-bottom: 0.5px solid var(--separator);
+      border-bottom: .5px solid var(--line);
     }
-    .memory-item:last-child {
-      border-bottom: none;
-    }
-    .memory-meta {
-      font-size: 13px;
-      color: var(--text-muted);
-      margin-bottom: 8px;
-    }
-    .memory-content {
-      font-size: 17px;
-      color: var(--text-main);
-      line-height: 1.4;
-    }
-    .memory-account {
-      margin-top: 8px;
-      font-size: 13px;
-      color: var(--tint-color);
-    }
-
-    /* 顶部导航 */
-    .nav-bar {
+    .memory:last-child { border-bottom: 0; }
+    .memory-head {
       display: flex;
       justify-content: space-between;
-      align-items: center;
-      margin-bottom: 16px;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 8px;
     }
+    .meta {
+      min-width: 0;
+      color: var(--muted);
+      font-size: 13px;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+    .content { color: var(--text); font-size: 17px; white-space: pre-wrap; word-break: break-word; }
+    .account { margin-top: 8px; color: var(--blue); font-size: 13px; }
 
-    .user-info {
-      font-size: 15px;
-      color: var(--text-muted);
+    .sheet-mask {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+      background: rgba(0, 0, 0, .22);
+      z-index: 20;
+      padding: 16px;
+    }
+    .sheet-mask.show { display: flex; }
+    .sheet {
+      width: 100%;
+      max-width: 420px;
+      background: var(--card-2);
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, .22);
+      transform: translateY(8px);
+      animation: rise .18s ease forwards;
+    }
+    @keyframes rise { to { transform: translateY(0); } }
+    .sheet-body { padding: 18px 16px 12px; text-align: center; }
+    .sheet-title { font-weight: 700; margin-bottom: 6px; }
+    .sheet-text { color: var(--muted); font-size: 14px; }
+    .sheet-actions { border-top: .5px solid var(--line); }
+    .sheet-actions button {
+      width: 100%;
+      border-radius: 0;
+      background: transparent;
+      color: var(--blue);
+      padding: 15px;
+      border-bottom: .5px solid var(--line);
+    }
+    .sheet-actions button:last-child { border-bottom: 0; }
+    .sheet-actions .confirm-delete { color: var(--red); font-weight: 600; }
+
+    @media (min-width: 760px) {
+      .app { padding-top: 42px; }
+      .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; }
+      .grid h2 { margin-top: 0; }
+      .span { grid-column: 1 / -1; }
     }
   </style>
 </head>
 <body>
-
-<div class="container">
-  
-  <!-- 登录视图 -->
-  <div id="view-login">
-    <h1 class="large-title">记忆数据库</h1>
-    <div class="section-title">身份验证</div>
-    <div class="card card-padding">
-      <input id="lu" placeholder="用户名" value="admin" autocapitalize="none">
-      <input id="lpw" placeholder="密码" type="password">
-      <button class="btn" onclick="doLogin()" style="margin-top: 16px;">登录</button>
-      <div id="lr" class="msg error hide"></div>
-    </div>
-  </div>
-
-  <!-- 主应用视图 -->
-  <div id="view-app" class="hide">
-    
-    <div class="nav-bar">
-      <div class="user-info">已登录：<span id="who"></span></div>
-      <button class="btn btn-text" onclick="doLogout()">退出</button>
-    </div>
-    
-    <h1 class="large-title">我的记忆</h1>
-
-    <!-- 录入记忆 -->
-    <div class="section-title">添加新记忆</div>
-    <div class="card card-padding">
-      <textarea id="mi" placeholder="在这里输入自然语言... 例如：我的护照在书房抽屉里"></textarea>
-      <div class="flex-between" style="margin-top: 12px;">
-        <div id="sr" class="msg hide" style="margin:0;"></div>
-        <button class="btn" id="sb" onclick="saveMemory()" style="width: auto; padding: 8px 20px;">保存</button>
+  <main class="app">
+    <section id="loginView">
+      <h1>记忆数据库</h1>
+      <h2>登录</h2>
+      <div class="card pad">
+        <input id="username" class="field" placeholder="用户名" value="admin" autocomplete="username" autocapitalize="none">
+        <input id="password" class="field" placeholder="密码" type="password" autocomplete="current-password">
+        <button id="loginBtn" class="primary">登录</button>
+        <div id="loginMsg" class="msg error hide"></div>
       </div>
-    </div>
+    </section>
 
-    <!-- 检索记忆 -->
-    <div class="section-title">AI 检索</div>
-    <div class="card card-padding">
-      <div class="flex-row">
-        <input id="qi" placeholder="提问... 例如：我的护照在哪？" style="margin-bottom: 0;">
-        <button class="btn" onclick="searchMemory()" style="width: auto; padding: 12px 20px;">搜索</button>
+    <section id="appView" class="hide">
+      <div class="topbar">
+        <div id="who" class="user"></div>
+        <button id="logoutBtn" class="plain">退出</button>
       </div>
-      <div id="qr" class="msg hide" style="margin-top: 16px; padding-top: 16px; border-top: 0.5px solid var(--separator);"></div>
-    </div>
+      <h1>我的记忆</h1>
 
-    <!-- 记忆列表 -->
-    <div class="flex-between" style="margin-top: 24px;">
-      <div class="section-title" style="margin-top: 0;">全部记忆</div>
-      <button class="btn btn-text" style="font-size: 15px; margin-right: 16px;" onclick="listMemories()">刷新</button>
-    </div>
-    <div class="card" id="lr2">
-      <div class="card-padding">
-        <div class="msg info">加载中...</div>
-      </div>
-    </div>
-
-    <!-- 系统配置 -->
-    <div class="section-title">LLM 节点配置</div>
-    <div class="card card-padding">
-      <input id="le" placeholder="API Endpoint (例如 https://api.deepseek.com)">
-      <input id="lm" placeholder="模型名称 (例如 deepseek-chat)">
-      <input id="lk" type="password" placeholder="API Key">
-      
-      <div class="flex-row" style="margin-top: 16px;">
-        <button class="btn btn-secondary" onclick="getConfig()">查看状态</button>
-        <button class="btn" onclick="updateConfig()">更新配置</button>
-      </div>
-      <div id="cr" class="msg hide"></div>
-    </div>
-
-  </div>
-</div>
-
-<script>
-let API = 'https://cloudflare-memory-db.1379top-8bd.workers.dev/api';
-const qs = id => document.getElementById(id);
-const esc = s => String(s||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[m]));
-const show = (id, html, type = 'info') => {
-  const el = qs(id);
-  el.className = `msg ${type}`;
-  el.innerHTML = html;
-};
-const hide = id => qs(id).classList.add('hide');
-const hdr = () => {
-  const h = {'Content-Type': 'application/json'};
-  const t = localStorage.getItem('token');
-  if(t) h['Authorization'] = 'Bearer ' + t;
-  return h;
-};
-
-async function doLogin() {
-  const u = qs('lu').value.trim(), p = qs('lpw').value;
-  if(!u || !p) return show('lr', '请输入用户名和密码', 'error');
-  
-  const btn = qs('lr').previousElementSibling;
-  const originalText = btn.innerText;
-  btn.innerText = '登录中...';
-  
-  try {
-    const r = await fetch(API+'/login', { method:'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({username:u, master_password:p}) });
-    const d = await r.json();
-    if(!d.success) throw new Error(d.error || '登录失败，请检查账号密码或 API 地址');
-    
-    if(d.data?.token) localStorage.setItem('token', d.data.token);
-    localStorage.setItem('user', d.data.username);
-    
-    qs('who').textContent = d.data.username;
-    qs('view-login').classList.add('hide');
-    qs('view-app').classList.remove('hide');
-    listMemories();
-  } catch(e) {
-    show('lr', e.message, 'error');
-  } finally {
-    btn.innerText = originalText;
-  }
-}
-
-function doLogout() {
-  localStorage.removeItem('token');
-  localStorage.removeItem('user');
-  location.reload();
-}
-
-function init() {
-  const t = localStorage.getItem('token');
-  if(t) {
-    qs('who').textContent = localStorage.getItem('user') || 'admin';
-    qs('view-login').classList.add('hide');
-    qs('view-app').classList.remove('hide');
-    listMemories();
-  }
-}
-init();
-
-async function saveMemory() {
-  const t = qs('mi').value.trim();
-  if(!t) return;
-  const btn = qs('sb');
-  btn.innerText = '处理中...';
-  try {
-    const r = await fetch(API+'/memory', { method:'POST', headers:hdr(), body:JSON.stringify({text:t}) });
-    const d = await r.json();
-    if(d.success) {
-      show('sr', '已保存', 'success');
-      qs('mi').value = '';
-      listMemories();
-      setTimeout(() => hide('sr'), 3000);
-    } else {
-      throw new Error(d.error || d.message || '保存失败');
-    }
-  } catch(e) {
-    show('sr', e.message, 'error');
-  } finally {
-    btn.innerText = '保存';
-  }
-}
-
-async function searchMemory() {
-  const q = qs('qi').value.trim();
-  if(!q) return;
-  show('qr', 'AI 正在思考...', 'info');
-  try {
-    const r = await fetch(API+'/memory/search?q='+encodeURIComponent(q), { headers:hdr() });
-    const d = await r.json();
-    if(d.success) {
-      show('qr', esc(d.answer).replace(/\n/g, '<br>'), 'text-main');
-      qs('qr').style.color = 'var(--text-main)';
-    } else {
-      throw new Error(d.error || '检索失败');
-    }
-  } catch(e) {
-    show('qr', e.message, 'error');
-  }
-}
-
-async function deleteMemory(id) {
-  if(!confirm('确定要删除这条记忆吗？')) return;
-  try {
-    const r = await fetch(API+'/memory/'+id, { method:'DELETE', headers:hdr() });
-    const d = await r.json();
-    if(d.success) listMemories();
-    else alert('删除失败: ' + d.error);
-  } catch(e) {
-    alert('网络错误');
-  }
-}
-
-async function listMemories() {
-  qs('lr2').innerHTML = '<div class="card-padding"><div class="msg info">加载中...</div></div>';
-  try {
-    const r = await fetch(API+'/memories?limit=50', { headers:hdr() });
-    const d = await r.json();
-    if(!d.success) throw new Error(d.error || '获取失败');
-    const a = d.data.memories || [];
-    if(!a.length) {
-      qs('lr2').innerHTML = '<div class="card-padding"><div class="msg info">暂无记忆</div></div>';
-      return;
-    }
-    let h = '';
-    a.forEach(m => {
-      h += `
-        <div class="memory-item">
-          <div class="flex-between memory-meta">
-            <span>${esc(m.platform || '未分类')} · ${esc((m.created_at || '').slice(0,10))}</span>
-            <button class="btn-danger" onclick="deleteMemory('${m.id}')">删除</button>
+      <div class="grid">
+        <div>
+          <h2>添加记忆</h2>
+          <div class="card pad">
+            <textarea id="memoryInput" placeholder="写下一条记忆，例如：护照在书房第二个抽屉"></textarea>
+            <div class="between">
+              <div id="saveMsg" class="msg hide" style="margin:0"></div>
+              <button id="saveBtn" class="small">保存</button>
+            </div>
           </div>
-          <div class="memory-content">${esc(m.raw_input || '')}</div>
-          ${m.account ? `<div class="memory-account">账号: ${esc(m.account)}</div>` : ''}
         </div>
-      `;
-    });
-    qs('lr2').innerHTML = h;
-  } catch(e) {
-    qs('lr2').innerHTML = `<div class="card-padding"><div class="msg error">${esc(e.message)}</div></div>`;
-  }
-}
 
-async function getConfig() {
-  try {
-    const r = await fetch(API+'/config', { headers:hdr() });
-    const d = await r.json();
-    if(!d.success) throw new Error(d.error || '获取配置失败');
-    const c = d.data || {};
-    let html = `
-      <div style="margin-top: 12px; font-size: 15px;">
-        <div style="margin-bottom: 4px;"><span style="color:var(--text-muted)">接口:</span> ${esc(c.llm_endpoint) || '未设置'}</div>
-        <div style="margin-bottom: 4px;"><span style="color:var(--text-muted)">模型:</span> ${esc(c.llm_model) || '未设置'}</div>
-        <div><span style="color:var(--text-muted)">密钥:</span> ${c.has_key ? '<span style="color:var(--success-color)">已配置</span>' : '<span style="color:var(--danger-color)">未配置</span>'}</div>
+        <div>
+          <h2>搜索</h2>
+          <div class="card pad">
+            <div class="row">
+              <input id="searchInput" class="field grow" placeholder="问一个问题" style="margin:0">
+              <button id="searchBtn" class="small">搜索</button>
+            </div>
+            <div id="searchMsg" class="msg hide"></div>
+          </div>
+        </div>
+
+        <div class="span">
+          <div class="between">
+            <h2 style="margin-bottom:8px">全部记忆</h2>
+            <button id="refreshBtn" class="plain" style="font-size:15px;margin-right:16px">刷新</button>
+          </div>
+          <div id="memoryList" class="card">
+            <div class="list-empty">正在加载…</div>
+          </div>
+        </div>
+
+        <div class="span">
+          <h2>LLM 配置</h2>
+          <div class="card pad">
+            <input id="llmEndpoint" class="field" placeholder="接口地址，例如 https://api.deepseek.com/v1/chat/completions">
+            <input id="llmModel" class="field" placeholder="模型名称，例如 deepseek-chat">
+            <input id="llmKey" class="field" type="password" placeholder="API Key">
+            <div class="row">
+              <button id="configStatusBtn" class="secondary grow">查看状态</button>
+              <button id="configSaveBtn" class="grow">更新配置</button>
+            </div>
+            <div id="configMsg" class="msg hide"></div>
+          </div>
+        </div>
       </div>
-    `;
-    show('cr', html, 'info');
-  } catch(e) {
-    show('cr', e.message, 'error');
-  }
-}
+    </section>
+  </main>
 
-async function updateConfig() {
-  const body = {
-    llm_endpoint: qs('le').value.trim(),
-    llm_model: qs('lm').value.trim(),
-    llm_key: qs('lk').value.trim()
-  };
-  if(!body.llm_endpoint && !body.llm_model && !body.llm_key) return;
-  
-  const btn = event.target;
-  const originalText = btn.innerText;
-  btn.innerText = '更新中...';
-  
-  try {
-    const r = await fetch(API+'/config', { method:'POST', headers:hdr(), body:JSON.stringify(body) });
-    const d = await r.json();
-    if(d.success) {
-      show('cr', '配置已更新', 'success');
-      qs('le').value = ''; qs('lm').value = ''; qs('lk').value = '';
-      setTimeout(() => hide('cr'), 3000);
-    } else {
-      throw new Error(d.error || '更新失败');
+  <div id="deleteSheet" class="sheet-mask" aria-hidden="true">
+    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="deleteTitle">
+      <div class="sheet-body">
+        <div id="deleteTitle" class="sheet-title">删除这条记忆？</div>
+        <div class="sheet-text">删除后无法恢复。</div>
+      </div>
+      <div class="sheet-actions">
+        <button id="confirmDeleteBtn" class="confirm-delete">删除</button>
+        <button id="cancelDeleteBtn">取消</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API = 'https://cloudflare-memory-db.1379top-8bd.workers.dev/api';
+    const $ = id => document.getElementById(id);
+    const esc = value => String(value ?? '').replace(/[&<>"']/g, char => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[char]));
+
+    let pendingDeleteId = '';
+
+    function headers() {
+      const h = { 'Content-Type': 'application/json' };
+      const token = localStorage.getItem('token');
+      if (token) h.Authorization = 'Bearer ' + token;
+      return h;
     }
-  } catch(e) {
-    show('cr', e.message, 'error');
-  } finally {
-    btn.innerText = originalText;
-  }
-}
-</script>
+
+    function show(id, html, type = 'info') {
+      const el = $(id);
+      el.className = 'msg ' + type;
+      el.innerHTML = html;
+    }
+
+    function hide(id) { $(id).classList.add('hide'); }
+
+    function setBusy(button, busy, text) {
+      if (!button) return;
+      if (busy) {
+        button.dataset.oldText = button.textContent;
+        button.textContent = text;
+        button.disabled = true;
+      } else {
+        button.textContent = button.dataset.oldText || button.textContent;
+        button.disabled = false;
+      }
+    }
+
+    function enterApp(username) {
+      $('who').textContent = '已登录：' + (username || 'admin');
+      $('loginView').classList.add('hide');
+      $('appView').classList.remove('hide');
+      listMemories();
+    }
+
+    async function login() {
+      const username = $('username').value.trim();
+      const password = $('password').value;
+      if (!username || !password) return show('loginMsg', '请输入用户名和密码', 'error');
+
+      const btn = $('loginBtn');
+      setBusy(btn, true, '登录中…');
+      try {
+        const res = await fetch(API + '/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, master_password: password })
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error || data.message || '登录失败');
+
+        localStorage.setItem('token', data.data?.token || '');
+        localStorage.setItem('user', data.data?.username || username);
+        enterApp(data.data?.username || username);
+      } catch (err) {
+        show('loginMsg', esc(err.message || '登录失败'), 'error');
+      } finally {
+        setBusy(btn, false);
+      }
+    }
+
+    function logout() {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      location.reload();
+    }
+
+    async function saveMemory() {
+      const text = $('memoryInput').value.trim();
+      if (!text) return;
+
+      const btn = $('saveBtn');
+      setBusy(btn, true, '保存中…');
+      try {
+        const res = await fetch(API + '/memory', {
+          method: 'POST',
+          headers: headers(),
+          body: JSON.stringify({ text })
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error || data.message || '保存失败');
+
+        $('memoryInput').value = '';
+        show('saveMsg', '已保存', 'success');
+        setTimeout(() => hide('saveMsg'), 2200);
+        listMemories();
+      } catch (err) {
+        show('saveMsg', esc(err.message || '保存失败'), 'error');
+      } finally {
+        setBusy(btn, false);
+      }
+    }
+
+    async function searchMemory() {
+      const query = $('searchInput').value.trim();
+      if (!query) return;
+
+      const btn = $('searchBtn');
+      setBusy(btn, true, '搜索中…');
+      show('searchMsg', '正在检索…');
+      try {
+        const res = await fetch(API + '/memory/search?q=' + encodeURIComponent(query), { headers: headers() });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error || data.message || '搜索失败');
+        show('searchMsg', esc(data.answer || '没有找到相关记忆'), 'answer');
+      } catch (err) {
+        show('searchMsg', esc(err.message || '搜索失败'), 'error');
+      } finally {
+        setBusy(btn, false);
+      }
+    }
+
+    async function listMemories() {
+      $('memoryList').innerHTML = '<div class="list-empty">正在加载…</div>';
+      try {
+        const res = await fetch(API + '/memories?limit=50', { headers: headers() });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error || data.message || '获取失败');
+
+        const memories = data.data?.memories || [];
+        if (!memories.length) {
+          $('memoryList').innerHTML = '<div class="list-empty">暂无记忆</div>';
+          return;
+        }
+
+        $('memoryList').innerHTML = memories.map(item => `
+          <article class="memory">
+            <div class="memory-head">
+              <div class="meta">${esc(item.platform || '未分类')} · ${esc((item.created_at || '').slice(0, 10))}</div>
+              <button class="danger" type="button" data-delete-id="${esc(item.id)}">删除</button>
+            </div>
+            <div class="content">${esc(item.raw_input || '')}</div>
+            ${item.account ? `<div class="account">账号：${esc(item.account)}</div>` : ''}
+          </article>
+        `).join('');
+      } catch (err) {
+        $('memoryList').innerHTML = `<div class="list-empty" style="color:var(--red)">${esc(err.message || '获取失败')}</div>`;
+      }
+    }
+
+    function openDeleteSheet(id) {
+      pendingDeleteId = id;
+      $('deleteSheet').classList.add('show');
+      $('deleteSheet').setAttribute('aria-hidden', 'false');
+    }
+
+    function closeDeleteSheet() {
+      pendingDeleteId = '';
+      $('deleteSheet').classList.remove('show');
+      $('deleteSheet').setAttribute('aria-hidden', 'true');
+    }
+
+    async function confirmDelete() {
+      const id = pendingDeleteId;
+      if (!id) return closeDeleteSheet();
+
+      const btn = $('confirmDeleteBtn');
+      setBusy(btn, true, '删除中…');
+      try {
+        const res = await fetch(API + '/memory/' + encodeURIComponent(id), {
+          method: 'DELETE',
+          headers: headers()
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error || data.message || '删除失败');
+        closeDeleteSheet();
+        listMemories();
+      } catch (err) {
+        alert(err.message || '删除失败');
+      } finally {
+        setBusy(btn, false);
+      }
+    }
+
+    async function getConfig() {
+      show('configMsg', '正在读取…');
+      try {
+        const res = await fetch(API + '/config', { headers: headers() });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error || data.message || '读取失败');
+        const c = data.data || {};
+        show('configMsg', `接口：${esc(c.llm_endpoint || '未设置')}<br>模型：${esc(c.llm_model || '未设置')}<br>密钥：${c.has_key ? '<span style="color:var(--green)">已配置</span>' : '<span style="color:var(--red)">未配置</span>'}`);
+      } catch (err) {
+        show('configMsg', esc(err.message || '读取失败'), 'error');
+      }
+    }
+
+    async function updateConfig() {
+      const body = {
+        llm_endpoint: $('llmEndpoint').value.trim(),
+        llm_model: $('llmModel').value.trim(),
+        llm_key: $('llmKey').value.trim()
+      };
+      if (!body.llm_endpoint && !body.llm_model && !body.llm_key) return show('configMsg', '请至少填写一项配置');
+
+      const btn = $('configSaveBtn');
+      setBusy(btn, true, '更新中…');
+      try {
+        const res = await fetch(API + '/config', {
+          method: 'POST',
+          headers: headers(),
+          body: JSON.stringify(body)
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error || data.message || '更新失败');
+        $('llmEndpoint').value = '';
+        $('llmModel').value = '';
+        $('llmKey').value = '';
+        show('configMsg', '配置已更新', 'success');
+      } catch (err) {
+        show('configMsg', esc(err.message || '更新失败'), 'error');
+      } finally {
+        setBusy(btn, false);
+      }
+    }
+
+    $('loginBtn').addEventListener('click', login);
+    $('logoutBtn').addEventListener('click', logout);
+    $('saveBtn').addEventListener('click', saveMemory);
+    $('searchBtn').addEventListener('click', searchMemory);
+    $('refreshBtn').addEventListener('click', listMemories);
+    $('configStatusBtn').addEventListener('click', getConfig);
+    $('configSaveBtn').addEventListener('click', updateConfig);
+    $('cancelDeleteBtn').addEventListener('click', closeDeleteSheet);
+    $('confirmDeleteBtn').addEventListener('click', confirmDelete);
+    $('deleteSheet').addEventListener('click', event => {
+      if (event.target.id === 'deleteSheet') closeDeleteSheet();
+    });
+    $('memoryList').addEventListener('click', event => {
+      const btn = event.target.closest('[data-delete-id]');
+      if (btn) openDeleteSheet(btn.dataset.deleteId);
+    });
+    $('password').addEventListener('keydown', event => { if (event.key === 'Enter') login(); });
+    $('searchInput').addEventListener('keydown', event => { if (event.key === 'Enter') searchMemory(); });
+
+    if (localStorage.getItem('token')) enterApp(localStorage.getItem('user') || 'admin');
+  </script>
 </body>
 </html>

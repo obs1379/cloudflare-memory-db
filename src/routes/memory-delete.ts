@@ -1,7 +1,7 @@
 import { Context } from 'hono';
-import { Env } from '../types';
+import { Env, AppVariables } from '../types';
 
-export async function deleteMemory(c: Context<{ Bindings: Env }>) {
+export async function deleteMemory(c: Context<{ Bindings: Env; Variables: AppVariables }>) {
   const userId = c.get('user_id');
   const memoryId = c.req.param('id');
 

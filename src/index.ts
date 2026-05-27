@@ -26,13 +26,6 @@ app.get('/', (c) => {
 app.post('/api/login', login);
 app.post('/api/logout', logout);
 
-// 诊断端点
-  try {
-    const r1: any = await c.env.AI.run('@cf/baai/bge-base-en-v1.5', { text: ['hello'] });
-    return c.json({ data0Len: r1?.data?.[0]?.length });
-  } catch (e: any) { return c.json({ error: e.message }); }
-});
-
 const protectedRoutes = new Hono<{ Bindings: Env }>();
 protectedRoutes.use('*', authMiddleware);
 protectedRoutes.post('/memory', createMemory);
