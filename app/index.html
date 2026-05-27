@@ -218,11 +218,6 @@
   <!-- 登录视图 -->
   <div id="view-login">
     <h1 class="large-title">记忆数据库</h1>
-    <div class="section-title">服务器配置</div>
-    <div class="card card-padding">
-      <input id="apiUrl" placeholder="API 地址 (例如 https://api.xxx.workers.dev)" value="">
-    </div>
-    
     <div class="section-title">身份验证</div>
     <div class="card card-padding">
       <input id="lu" placeholder="用户名" value="admin" autocapitalize="none">
@@ -291,7 +286,7 @@
 </div>
 
 <script>
-let API = '';
+let API = 'https://cloudflare-memory-db.1379top-8bd.workers.dev/api';
 const qs = id => document.getElementById(id);
 const esc = s => String(s||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[m]));
 const show = (id, html, type = 'info') => {
@@ -308,8 +303,6 @@ const hdr = () => {
 };
 
 async function doLogin() {
-  API = qs('apiUrl').value.trim().replace(/\/+$/, '');
-  if(!API) return show('lr', '请输入 API 地址', 'error');
   const u = qs('lu').value.trim(), p = qs('lpw').value;
   if(!u || !p) return show('lr', '请输入用户名和密码', 'error');
   
@@ -324,7 +317,6 @@ async function doLogin() {
     
     if(d.data?.token) localStorage.setItem('token', d.data.token);
     localStorage.setItem('user', d.data.username);
-    localStorage.setItem('api', API);
     
     qs('who').textContent = d.data.username;
     qs('view-login').classList.add('hide');
@@ -344,11 +336,8 @@ function doLogout() {
 }
 
 function init() {
-  const saved = localStorage.getItem('api');
-  if(saved) qs('apiUrl').value = saved;
   const t = localStorage.getItem('token');
-  if(t && saved) {
-    API = saved;
+  if(t) {
     qs('who').textContent = localStorage.getItem('user') || 'admin';
     qs('view-login').classList.add('hide');
     qs('view-app').classList.remove('hide');
